@@ -3,27 +3,23 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                echo 'Getting source code'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t novabridge-web:v2 app/'
+                sh 'docker build -t zoya9545/novabridge-web:v2 app/'
             }
         }
 
-        stage('Remove Old Container') {
+        stage('Push Docker Image') {
             steps {
-                sh 'docker rm -f novabridge-container || true'
+                sh 'docker push zoya9545/novabridge-web:v2'
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'docker run -d --name novabridge-container -p 8081:80 novabridge-web:v2'
+                sh '''
+                kubectl rollout restart deployment novabridge-deployment
+                '''
             }
         }
     }
